@@ -1,6 +1,6 @@
-# tournament: A backend application for determining the winner of a swiss style game tournament.
+# Tournament: A backend application for determining the winner of a swiss style game tournament.
 
-tournament is a python and postgresql application for creating the backend functionality to a swiss style game tournament.
+Tournament is a python and postgresql application for creating the backend functionality to a swiss style game tournament.
 Allows for creating players/matches, deleting players/matches, counting players, checking players standings, and creating the swiss tournament.
 
 ### Usage
