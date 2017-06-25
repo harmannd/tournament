@@ -1,23 +1,41 @@
 -- Table definitions for the tournament project.
---
--- Put your SQL 'create table' statements in this file; also 'create view'
--- statements if you choose to use it.
---
--- You can write comments in this file by starting them with two dashes, like
--- these lines here.
+DROP DATABASE tournament;
+CREATE DATABASE tournament;
+\c tournament;
 
-CREATE TABLE "player"
-(
-    id serial primary key,
-    name text NOT NULL,
-    wins int DEFAULT 0,
-    matches int DEFAULT 0
+CREATE TABLE Players (
+    id serial PRIMARY KEY,
+    name text NOT NULL
 );
 
-CREATE TABLE "game"
-(
-    id serial primary key,
-    player1 int references player(id),
-    player2 int references player(id),
-    winner int references player(id)
+CREATE TABLE Games (
+    id serial PRIMARY KEY,
+    winner int REFERENCES Players(id),
+    loser int REFERENCES Players(id)
 );
+
+CREATE VIEW v_wins AS
+    SELECT Players.id AS pl_id, count(Games.winner) AS wins
+    FROM Players LEFT JOIN Games
+    ON Players.id = Games.winner
+    GROUP BY Players.id;
+
+CREATE VIEW v_losses AS
+    SELECT Players.id AS pl_id, count(Games.loser) AS losses
+    FROM Players LEFT JOIN Games
+    ON Players.id = Games.loser
+    GROUP BY Players.id;
+
+CREATE VIEW v_matches AS
+    SELECT v_wins.pl_id AS pl_id, SUM(v_losses.losses + v_wins.wins) AS matches
+    FROM v_wins JOIN v_losses
+    ON v_wins.pl_id = v_losses.pl_id
+    GROUP BY v_wins.pl_id;
+
+CREATE VIEW v_standings AS
+    SELECT Players.id, Players.name, v_wins.wins, v_matches.matches
+    FROM Players
+    LEFT JOIN v_wins ON Players.id = v_wins.pl_id
+    LEFT JOIN v_matches ON Players.id = v_matches.pl_id
+    GROUP BY Players.id, v_wins.wins, v_matches.matches
+    ORDER BY wins DESC;
